@@ -10,3 +10,4 @@ export default async function connect() {
   await client.connect()
   return client;
 }
+
