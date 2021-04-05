@@ -1,72 +1,79 @@
-import {Router} from 'express'
-import app from '../app'
-const router = Router()
-import { ApiError } from "../errors/APIErrors"
-import authMiddleware from "../middleware/basic-auth"
-import facade from "../facade/DummyDB-Facade"
-import { IFriend } from '../interfaces/IFriend';
-router.use(authMiddleware)
+import { Router } from "express"
+const router = Router();
+import { ApiError } from "../errors/errors"
+import FriendFacade from "../facades/friendFacade"
+const debug = require("debug")("friend-routes")
 
-//Get All Friends
-router.get("/all", async (req,res) => {
-  const friends = await facade.getAllFriends()
-  const friendsDTO = friends.map(friend => {
-      const {firstName,lastName} = friend //Destructuring
-      return {firstName,lastName} //return new object to friendsDTO array
-  })
-  res.json(friendsDTO)
-})
+let facade: FriendFacade;
 
-//Get Friend by mail
-router.get("/me", async (req:any, res, next) => {
-  const userId = req.credentials.userName;
-  try{
-  const friend = await facade.getFriend(userId);
-  if (friend == null) {
-    throw new ApiError("user not found",404)
+// Initialize facade using the database set on the application object
+router.use(async (req, res, next) => {
+  if (!facade) {
+    const db = req.app.get("db")
+    debug("Database used: " + req.app.get("db-type"))
+    facade = new FriendFacade(db)
   }
-  const { firstName, lastName, email } = friend;
-  const friendDTO = { firstName, lastName, email }
-  res.json(friendDTO);
-} catch (err) {
-  next(err)
-}
+  next()
 })
-/*router.get("/findby-username/:userid", async (req, res, next) => {
-    const userId = req.params.userid;
-    try{
-    const friend = await facade.getFriend(userId);
-    if (friend == null) {
-      throw new ApiError("user not found",404)
-    }
-    const { firstName, lastName, email } = friend;
-    const friendDTO = { firstName, lastName, email }
-    res.json(friendDTO);
+
+// This does NOT require authentication in order to let new users create themself
+router.post('/', async function (req, res, next) {
+  try {
+    let newFriend = req.body;
+    //#####################################
+    throw new Error("COMPLETE THIS METHOD")
+    //#####################################
   } catch (err) {
-    next(err)
-  }
-})*/
-  
-//Add Friend
-router.post("/add", async (req,res) => {
-    console.log("Hello")
-    console.log(req.body)
-    let friend : IFriend = {
-        id: "",
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        email: req.body.email,
-        password: req.body.password 
+    debug(err)
+    if (err instanceof ApiError) {
+      next(err)
+    } else {
+      next(new ApiError(err.message, 400));
     }
-    const addFriend = await facade.addFriend(friend)
-    res.send(addFriend)
-  })
-
-//Delete by email
-router.delete("/delete/:id", async (req,res) => {
-    const friend = await facade.deleteFriend(req.params.id)
-    res.json(friend)
+  }
 })
 
+router.get("/all", async (req: any, res) => {
+  const friends = await facade.getAllFriends();
+  const friendsDTO = friends.map(friend => {
+    const { firstName, lastName, email } = friend
+    return { firstName, lastName, email }
+  })
+  res.json(friendsDTO);
+})
+
+router.put('/:email', async function (req: any, res, next) {
+
+  try {
+    const email = null //GET THE USERS EMAIL FROM SOMEWHERE (req.params OR req.credentials.userName)
+    let newFriend = req.body;
+    //#####################################
+    throw new Error("COMPLETE THIS METHOD")
+    //#####################################
+
+  } catch (err) {
+    debug(err)
+    if (err instanceof ApiError) {
+      return next(err)
+    }
+    next(new ApiError(err.message, 400));
+  }
+})
+
+router.get("/find-user/:email", async (req: any, res, next) => {
+
+  const userId = req.params.userid;
+  try {
+    //#####################################
+    throw new Error("COMPLETE THIS METHOD")
+    //#####################################
+  } catch (err) {
+    debug(err)
+    if (err instanceof ApiError) {
+      return next(err)
+    }
+    next(new ApiError(err.message, 400));
+  }
+})
 
 export default router
