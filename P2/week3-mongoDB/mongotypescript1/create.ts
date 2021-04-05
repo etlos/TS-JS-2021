@@ -9,5 +9,9 @@ import setupTestData from "./setupTestData"
   const status = await setupTestData(collection)
   
   //Add your play-around code here
+  const demo = db.collection("demo")
+  await demo.insertOne({name: "Kurt"})
+  await demo.insertOne({animal: "Dog"})
+   
   client.close()
 })()
