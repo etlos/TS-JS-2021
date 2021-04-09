@@ -27,17 +27,15 @@ class FriendsFacade {
    * @param friend 
    * @throws ApiError if validation fails
    */
-  async addFriend(friend: IFriend): Promise<{ id: String }> {
+  async addFriend(friend: IFriend): Promise<{ id: string }> {
     const status = USER_INPUT_SCHEMA.validate(friend);
     if (status.error) {
       throw new ApiError(status.error.message, 400)
     }
     const hashedpw = await bcrypt.hash(friend.password, BCRYPT_ROUNDS);
-    const f = { ...friend, password: hashedpw }
-
-    //TODO ######################################
-    throw new Error("COMPLETE THIS METHOD")
-    // #########################################
+    const f = { ...friend, password: hashedpw, role: 'user' }
+    const result = await this.friendCollection.insertOne(f)
+    return result.insertedId
   }
 
   /**
@@ -53,10 +51,18 @@ class FriendsFacade {
     }
     const hashedpw = await bcrypt.hash(friend.password, BCRYPT_ROUNDS);
     const f = { ...friend, password: hashedpw }
-
-    //TODO ######################################
-    throw new Error("COMPLETE THIS METHOD")
-    // #########################################
+    const result = await this.friendCollection.updateOne(
+      { email },
+      {
+        $set: {
+          firstName: f.firstName, lastName: f.lastName, email: f.email, password: f.password
+        }
+      }
+    )
+    if (result.modifiedCount === 0) {
+      throw new ApiError("User email not found", 404)
+    }
+    return ({ modifiedCount: 1 })
   }
 
   /**
@@ -65,13 +71,18 @@ class FriendsFacade {
    * @returns true if deleted otherwise false
    */
   async deleteFriend(friendEmail: string): Promise<boolean> {
-  //TODO #####################################
-    throw new Error("COMPLETE THIS METHOD")
-    // #########################################
+    const status = await this.friendCollection.deleteOne({ email: friendEmail })
+    if (status.deletedCount === 0) {
+      return false
+    }
+    return true
   }
 
   async getAllFriends(): Promise<Array<IFriend>> {
     const users: unknown = await this.friendCollection.find({}).toArray();
+    if (users === null) {
+      throw new ApiError("it seems youve lost your friends?")
+    }
     return users as Array<IFriend>
   }
   
@@ -82,9 +93,11 @@ class FriendsFacade {
    * @throws ApiError if not found
    */
   async getFrind(friendEmail: string): Promise<IFriend> {
-     //TODO #####################################
-     throw new Error("COMPLETE THIS METHOD")
-     // #########################################
+    const friend = await this.friendCollection.findOne({ email: friendEmail })
+    if (friend.email !== friendEmail) {
+      throw new ApiError("", 400)
+    }
+    return friend
   }
 
   /**

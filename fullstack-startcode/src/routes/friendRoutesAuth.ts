@@ -1,4 +1,4 @@
-import { Router } from "express"
+import e, { Router } from "express"
 const router = Router();
 import { ApiError } from "../errors/errors"
 import FriendFacade from "../facades/friendFacade"
@@ -42,6 +42,9 @@ if (USE_AUTHENTICATION) {
 }
 
 router.get("/all", async (req: any, res) => {
+  if (!USE_AUTHENTICATION) {
+    throw new ApiError("Not Authorized", 401)
+  }
   const friends = await facade.getAllFriends();
 
   const friendsDTO = friends.map(friend => {
@@ -59,10 +62,12 @@ router.put('/editme', async function (req: any, res, next) {
     if (!USE_AUTHENTICATION) {
       throw new ApiError("This endpoint requires authentication", 500)
     }
-    const email = null //GET THE USERS EMAIL FROM SOMEWHERE (req.params OR req.credentials.userName)
-    //#####################################
-    throw new Error("COMPLETE THIS METHOD")
-    //#####################################
+    const email = req.credentials.userName
+    const newMe = req.body
+    const status = await facade.editFriend(email, newMe)
+    if(status.modifiedCount === 1){
+    res.json(newMe)
+    }
   } catch (err) {
     debug(err)
     if (err instanceof ApiError) {
@@ -70,6 +75,7 @@ router.put('/editme', async function (req: any, res, next) {
     }
     next(new ApiError(err.message, 400));
   }
+  
 })
 
 router.get("/me", async (req: any, res, next) => {
@@ -77,11 +83,9 @@ router.get("/me", async (req: any, res, next) => {
     if (!USE_AUTHENTICATION) {
       throw new ApiError("This endpoint requires authentication", 500)
     }
-    const email = null //GET THE USERS EMAIL FROM SOMEWHERE (req.params OR req.credentials.userName)
-    //#####################################
-    throw new Error("COMPLETE THIS METHOD")
-    //#####################################
-
+    const email = req.credentials.userName
+    const me = await facade.getFrind(email)
+    res.json(me)
   } catch (err) {
     next(err)
   }
@@ -91,21 +95,24 @@ router.get("/me", async (req: any, res, next) => {
 
 //An admin user can fetch everyone
 router.get("/find-user/:email", async (req: any, res, next) => {
-
   try {
     if (USE_AUTHENTICATION && !req.credentials.role || req.credentials.role !== "admin") {
       throw new ApiError("Not Authorized", 401)
     }
     const userId = req.params.email;
     const friend = await facade.getFrind(userId);
-    if (friend == null) {
-      throw new ApiError("user not found", 404)
-    }
+    if(friend !== null){
     const { firstName, lastName, email, role } = friend;
     const friendDTO = { firstName, lastName, email }
     res.json(friendDTO);
+    }
   } catch (err) {
-    next(err)
+    debug(err)
+    if (err instanceof ApiError) {
+      next(err)
+    } else {
+      next(new ApiError("user not found", 404));
+    }
   }
 })
 
@@ -117,12 +124,12 @@ router.put('/:email', async function (req: any, res, next) {
     if (USE_AUTHENTICATION && !req.credentials.role || req.credentials.role !== "admin") {
       throw new ApiError("Not Authorized", 401)
     }
-    const email = null //GET THE USERS EMAIL FROM SOMEWHERE (req.params OR req.credentials.userName)
+    const email = req.params.email //GET THE USERS EMAIL FROM SOMEWHERE (req.params OR req.credentials.userName)
     let newFriend = req.body;
-    //#####################################
-    throw new Error("COMPLETE THIS METHOD")
-    //#####################################
-
+    const status = await facade.editFriend(email, newFriend)
+    if(status.modifiedCount === 1){
+    res.json(newFriend)
+    }
   } catch (err) {
     debug(err)
     if (err instanceof ApiError) {
@@ -131,5 +138,23 @@ router.put('/:email', async function (req: any, res, next) {
     next(new ApiError(err.message, 400));
   }
 })
-
+//An admin user can delete everyone
+router.delete("/:email", async (req: any, res, next) => {
+  try {
+    if (USE_AUTHENTICATION && !req.credentials.role || req.credentials.role !== "admin") {
+      throw new ApiError("Not Authorized", 401)
+    }
+    const email = req.params.email //GET THE USERS EMAIL FROM SOMEWHERE (req.params OR req.credentials.userName)
+    const status = await facade.deleteFriend(email)
+    if(status === true){
+    res.json(`User with id: ${email} has been deleted`)
+    }
+  } catch (err) {
+    debug(err)
+    if (err instanceof ApiError) {
+      return next(err)
+    }
+    next(new ApiError(err.message, 400));
+  }
+})
 export default router

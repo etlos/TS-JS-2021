@@ -11,7 +11,9 @@ const authMiddleware = async function (req: Request, res: Response, next: Functi
     facade = new FriendFacade(req.app.get("db")); //Observe how you have access to the global app-object via the request object
   }
   var credentials = auth(req)
-  if (credentials && await check(credentials.name, credentials.pass, req)) {
+  let status = credentials && await check(credentials.name, credentials.pass, req)
+  
+  if (status) {
     next()
   } else {
     res.statusCode = 401
