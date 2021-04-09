@@ -59,7 +59,7 @@ describe("### Verify the /nameinfo endpoint ###", function () {
       "count":10771
     })
   })
-  it("Should eventually provide 'gender male, county US age 61'", async function () {
+  it("Should eventually provide an object like: {'gender': 'male', 'county': 'US', age: 61}", async function () {
     const response = await request.get("/nameinfo/donald")
     expect(response.body.gender).to.be.equal("male");
     expect(response.body.country).to.be.equal("US");
