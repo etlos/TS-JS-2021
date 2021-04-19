@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import path from "path"
 dotenv.config()
 import { ApiError } from "./errors/errors"
+import cors from "cors"
+
 
 //TODO: Decide for which one to use below
 import friendsRoutes from "./routes/friendRoutesAuth";
@@ -11,6 +13,7 @@ const debug = require("debug")("app")
 import { Request, Response, NextFunction } from "express"
 
 const app = express()
+app.use(cors())
 
 app.use(express.json())
 
@@ -31,6 +34,32 @@ app.use((req, res, next) => {
 //You can now use it from all your middlewares like this req.app.get("logger").log("info","Message")
 //Level can be one of the following: error, warn, info, http, verbose, debug, silly
 //Level = "error" will go to the error file in production
+
+import authMiddleware from "./middleware/basic-auth"
+//app.use("/graphql", authMiddleware)
+
+app.use("/graphql", (req, res, next) => {
+  const body = req.body;
+  if (body && body.query && body.query.includes("createFriend")) {
+    console.log("Create")
+    return next();
+  }
+  /* if (body && body.operationName && body.query.includes("IntrospectionQuery")) {
+    return next();
+  } */
+  if (body.query && (body.mutation || body.query)) {
+    return authMiddleware(req, res, next)
+  }
+  next()
+})
+
+import { graphqlHTTP } from 'express-graphql';
+import { schema } from './graphql/schema';
+
+app.use('/graphql', graphqlHTTP({
+  schema: schema,
+  graphiql: true,
+}));
 
 
 app.use(express.static(path.join(process.cwd(), "public")))
