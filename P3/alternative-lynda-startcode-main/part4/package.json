@@ -10,6 +10,7 @@
   "author": "Emmanuel Henri",
   "license": "ISC",
   "devDependencies": {
+    "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
     "@types/mongoose": "^5.10.4",
     "babel-cli": "^6.26.0",
@@ -18,6 +19,7 @@
   },
   "dependencies": {
     "casual": "^1.6.2",
+    "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-graphql": "^0.11.0",

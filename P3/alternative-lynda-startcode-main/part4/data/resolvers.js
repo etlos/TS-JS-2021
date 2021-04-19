@@ -5,6 +5,9 @@ export const resolvers = {
   Query: {
     getFriend: (_, { id }) => {
       return Friends.findById(id)
+    },
+    allFriends: () => {
+      return Friends.find({})
     }
   },
   Mutation: {
