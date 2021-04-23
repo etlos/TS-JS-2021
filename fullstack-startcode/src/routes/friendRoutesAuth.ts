@@ -3,6 +3,7 @@ const router = Router();
 import { ApiError } from "../errors/errors"
 import FriendFacade from "../facades/friendFacade"
 const debug = require("debug")("friend-routes")
+import base64 from "base-64"
 
 let facade: FriendFacade;
 
@@ -30,6 +31,16 @@ router.post('/', async function (req, res, next) {
       next(new ApiError(err.message, 400));
     }
   }
+})
+
+router.post("/login", async (req, res, next) => {
+  const { userName, password } = req.body;
+  const user = await facade.getVerifiedUser(userName, password)
+  if (!user) {
+    return next(new ApiError("Failded to login", 400))
+  }
+  const base64AuthString = "Basic " + base64.encode(userName + ":" + password)
+  res.json({ base64AuthString, user: user.email, role: user.role })
 })
 
 // ALL ENDPOINTS BELOW REQUIRES AUTHENTICATION
