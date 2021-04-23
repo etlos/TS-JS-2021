@@ -1,5 +1,18 @@
 import React, { useState } from "react";
 import ILyndaFriend, { Gender } from "../interfaces/interfaces"
+import { useMutation , gql } from "@apollo/client"
+
+const ADD_FRIEND = gql`
+mutation createFriend($friend:FriendInput) {
+  createFriend(input:$friend){
+    firstName
+    lastName
+    email
+    age
+    gender
+    id
+  }
+}`
 
 type AddFriendProps = {
   initialFriend?: ILyndaFriend
@@ -9,9 +22,8 @@ interface IKeyableFriend extends ILyndaFriend {
   [key: string]: any
 }
 const AddFriend = ({ initialFriend }: AddFriendProps) => {
-  const EMPTY_FRIEND: ILyndaFriend = { firstName: "", lastName: "", gender: Gender.OTHER, age: "", email: "" }
-  let newFriend = initialFriend ? initialFriend : { ...EMPTY_FRIEND }
-
+  const EMPTY_FRIEND: ILyndaFriend = { firstName: "", lastName: "", gender: "OTHER", age: -1, email: "" }
+  let newFriend: ILyndaFriend = initialFriend ? initialFriend : { ...EMPTY_FRIEND }
   const [friend, setFriend] = useState({ ...newFriend })
 
   const handleChange = (event: any) => {
