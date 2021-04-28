@@ -1,18 +1,24 @@
 import express from "express";
+import { Request, Response, NextFunction } from "express"
 import dotenv from "dotenv";
 import path from "path"
-dotenv.config()
 import { ApiError } from "./errors/errors"
 import cors from "cors"
-
+import { graphqlHTTP } from 'express-graphql';
+import { schema } from './graphql/schema';
+import authMiddleware from "./middleware/basic-auth"
 
 //TODO: Decide for which one to use below
 import friendsRoutes from "./routes/friendRoutesAuth";
 //import friendsRoutes from "./routes/friendRoutes";
-const debug = require("debug")("app")
-import { Request, Response, NextFunction } from "express"
 
+dotenv.config()
+const debug = require("debug")("app")
+
+/*HERE WE MAKE THE SERVER*/
 const app = express()
+
+/*USING MIDDLEWARE TO IMPLEMENT CORS*/
 app.use(cors())
 
 app.use(express.json())
@@ -35,9 +41,9 @@ app.use((req, res, next) => {
 //Level can be one of the following: error, warn, info, http, verbose, debug, silly
 //Level = "error" will go to the error file in production
 
-import authMiddleware from "./middleware/basic-auth"
 //app.use("/graphql", authMiddleware)
 
+/*RETURNING AUTH MIDDLEWARE IF BODY FINAL IF BLOACK IS MET */
 app.use("/graphql", (req, res, next) => {
   const body = req.body;
   if (body && body.query && body.query.includes("createFriend")) {
@@ -53,19 +59,16 @@ app.use("/graphql", (req, res, next) => {
   next()
 })
 
-import { graphqlHTTP } from 'express-graphql';
-import { schema } from './graphql/schema';
-
 app.use('/graphql', graphqlHTTP({
   schema: schema,
   graphiql: true,
 }));
 
-
 app.use(express.static(path.join(process.cwd(), "public")))
 
 app.use("/api/friends", friendsRoutes)
 
+//Simple GET endpoint
 app.get("/demo", (req, res) => {
   res.send("Server is up");
 })
