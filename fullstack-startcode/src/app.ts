@@ -7,8 +7,6 @@ import cors from "cors"
 import { graphqlHTTP } from 'express-graphql';
 import { schema } from './graphql/schema';
 import authMiddleware from "./middleware/basic-auth"
-
-//TODO: Decide for which one to use below
 import friendsRoutes from "./routes/friendRoutesAuth";
 //import friendsRoutes from "./routes/friendRoutes";
 
@@ -50,9 +48,9 @@ app.use("/graphql", (req, res, next) => {
     console.log("Create")
     return next();
   }
-  /* if (body && body.operationName && body.query.includes("IntrospectionQuery")) {
+  if (body && body.operationName && body.query.includes("IntrospectionQuery")) {
     return next();
-  } */
+  }
   if (body.query && (body.mutation || body.query)) {
     return authMiddleware(req, res, next)
   }
@@ -64,8 +62,10 @@ app.use('/graphql', graphqlHTTP({
   graphiql: true,
 }));
 
+//Grants access to static files
 app.use(express.static(path.join(process.cwd(), "public")))
 
+/*Friend part of API*/
 app.use("/api/friends", friendsRoutes)
 
 //Simple GET endpoint

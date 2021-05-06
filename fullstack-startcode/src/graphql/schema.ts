@@ -1,7 +1,7 @@
 import { makeExecutableSchema } from 'graphql-tools';
 import { resolvers } from './resolvers';
 
-const typeDefs = `
+const typeDefs = `#graphql
     type Friend {
         id: ID
         firstName: String
@@ -12,7 +12,7 @@ const typeDefs = `
     """
     Queries available for Friends
     """
-     type Query {
+    type Query {
         """
         Returns all details for all Friends
         (Should probably require 'admin' rights if your are using authentication)
@@ -36,11 +36,30 @@ const typeDefs = `
         password: String
         email: String!
     }
+    input PositionInput {
+        email: String!
+        longitude: Float!
+        latitude: Float!
+    }
+    input nearbyFriendInput {
+        email: String!
+        password: String!
+        longitude: Float!
+        latitude: Float!
+        distance: Float!
+    }
+
     type Mutation {
         """
         Allows anyone (non authenticated users) to create a new friend
         """
         createFriend(input: FriendInput): Friend
+
+        """ Adds or updates a position """
+        addPosition(input: PositionInput): Boolean
+
+        """Find nearby Friends"""
+        findNearbyFriends(input: nearbyFriendInput): [Friend]
        
     }
 `;

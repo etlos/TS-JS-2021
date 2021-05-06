@@ -3,11 +3,17 @@ import { IFriend } from '../interfaces/IFriend';
 import { ApiError } from '../errors/errors';
 import { Request } from "express";
 import fetch from "node-fetch"
+import IPosition from '../interfaces/IPosition';
+import PositionFacade from '../facades/positionFacade';
 
-
+interface IPositionInput {
+  email: string,
+  longitude: number,
+  latitude: number
+}
 
 let friendFacade: FriendFacade;
-
+let positionFacade: PositionFacade;
 /*
 We don't have access to app or the Router so we need to set up the facade in another way
 In www.ts IMPORT and CALL the method below, like so: 
@@ -17,6 +23,9 @@ Just before the line where you start the server
 export function setupFacade(db: any) {
   if (!friendFacade) {
     friendFacade = new FriendFacade(db)
+  }
+  if (!positionFacade) {
+    positionFacade = new PositionFacade(db)
   }
 }
 
@@ -49,9 +58,32 @@ export const resolvers = {
       })
     }
   },
+
+
   Mutation: {
+
     createFriend: async (_: object, { input }: { input: IFriend }) => {
       return friendFacade.addFriendV2(input)
+    },
+
+    addPosition: async (_: object, { input }: { input: IPositionInput}) => {
+      try{
+      positionFacade.addOrUpdatePosition(input.email, input.longitude, input.latitude)
+      return true
+      } catch{
+      return false
+      }
+    },
+
+    findNearbyFriends: async (_: object, { input }: {input: any}) => {
+      try {
+        positionFacade.findNearbyFriends(input.email, input.password, input.longitude, input.latitude, input.distance)
+        return true
+      } catch {
+        return false
+      }
     }
+
+
   },
 };

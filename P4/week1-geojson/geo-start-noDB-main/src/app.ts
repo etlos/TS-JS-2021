@@ -1,7 +1,7 @@
 import express from 'express'
 const app = express()
 import { graphqlHTTP } from 'express-graphql';
-import { schema } from './schema';
+import { schema } from './myOwnSchema';
 
 app.get('/', (req, res) => res.send('Geo Demo!'))
 

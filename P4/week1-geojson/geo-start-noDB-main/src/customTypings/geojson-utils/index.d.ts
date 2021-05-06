@@ -1,4 +1,3 @@
-/*
 declare module 'geojson-utils' {
   //export type Position = [latitude: number, longitude: number, elevation?: number]
 
@@ -25,4 +24,3 @@ declare module 'geojson-utils' {
   export function pointInPolygon(point: Point, polygon: Polygon): boolean
   export function geometryWithinRadius(point: Point, center: Point, radius: number): boolean
 }
-*/

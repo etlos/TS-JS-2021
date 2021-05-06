@@ -1,71 +1,80 @@
 import { makeExecutableSchema } from 'graphql-tools';
 import { resolvers } from './resolvers';
 
-const typeDefs = `
-
+const typeDefs = `#graphql
+ 
+type Status{
+  """TRUE if coordinates was inside gameArea, otherwise FALSE"""
+  status: String
+ 
+  """Contains a string with a description of whether given coordinates was inside or not inside the gameArea"""
+  msg: String
+}
+ 
 type Coordinate {
   latitude: Float!
   longitude:Float!
 }
-
+ 
 type Coordinates {
-  coordinates: [Coordinate]
+  coordinates: [[[Float]]]
 }
-
-type Status {
-  status: String
-  msg: String
-}
-
+ 
 type Point {
-  type: String
+ 
+  """Will ALWAYS have the value Point"""
+  type : String
+  
+  """Array with longitude followed by latitude [lon,lat]"""
+  coordinates: [Float]
 }
-
-type Name {
-  name: String
-}
-
+ 
+ 
 type Player {
-  """Will ALWAYS have the value --> Feature <--"""
-  type: String
-
   """userName of Player (or Team)"""
-  properties: Name
-
+  name : String
+  
   """GeoJson Point with the users location"""
-  geometry: Point
+  point : Point
 }
-
+ 
+"""Represents a user found, with the distance to the caller"""
 type User {
+  """Distance to the user searched for"""
   distance: Float
+ 
+  """userName of the user found"""
   to: String
 }
-
-
-
-type Query {
-
-  """Returns a GeoJson Polygon representing the legal gameArea"""
-  gameArea : Coordinates 
-
-  """Check whether caller, given his latitude and lontitude, is inside the gameArea"""
-  isUserInArea(latitude:Float!, longitude:Float!):Status!
-
-  """Given callers latitude and longitude all nearby Teams will be found (inside the given radius)"""
-  findNearbyPlayers(
-    latitude: Float!,
-    longitude: Float!,
-    distance: Int!,
-    ):[Player]!
-
-  """Given callers latitude and longitude, and the userName of the Team to find, returs the distance to this Team"""
-  distanceToUser(
-    latitude: Float!,
-    longitude: Float!,
-    userName: String,
-    ):User!
+ 
+"""
+Error for a call, with msg and statuscode
+"""
+type Error {
+  msg: String
+  statuscode : Int
 }
-`;
+ 
+type Query {
+ 
+  """Returns a GeoJson Polygon representing the legal gameArea"""
+  gameArea : Coordinates
+ 
+   """Check whether caller, given his latitude and longitude, is inside the gameArea"""
+   isUserInArea("Callers latitude" latitude: Float!,"Callers longitude" longitude:Float!) : Status!
+ 
+   """Given callers latitude and longitude all nearby Teams will be found (inside the given radius)"""
+   findNearbyPlayers(latitude: Float!, longitude: Float!,distance: Int!):[Player]!
+   
+   """
+   Given callers latitude and longitude, and the userName of the Team to find, returns 
+   an object with the distance and the name of the user found (team)
+   """
+   distanceToUser("callers latitude" latitude: Float!, 
+                  "callers longitude" longitude: Float!, 
+                  "user to find" userName: String) : User 
+}
+`
 
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
