@@ -66,6 +66,14 @@ export const resolvers = {
       return friendFacade.addFriendV2(input)
     },
 
+    editFriend: async (_: object, { input }: { input: IFriend }) => {
+      return friendFacade.editFriendV2(input.email, input)
+    },
+
+    deleteFriend: async (_: object, { input }: { input: any }) => {
+      return friendFacade.deleteFriend(input.email)
+    },
+
     addPosition: async (_: object, { input }: { input: IPositionInput}) => {
       try{
       positionFacade.addOrUpdatePosition(input.email, input.longitude, input.latitude)

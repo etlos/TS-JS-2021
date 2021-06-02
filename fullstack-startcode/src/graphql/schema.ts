@@ -49,17 +49,26 @@ const typeDefs = `#graphql
         distance: Float!
     }
 
+    input Email {
+        email: String!
+    }
+
     type Mutation {
         """
         Allows anyone (non authenticated users) to create a new friend
         """
         createFriend(input: FriendInput): Friend
-
+        
+        """ Adds or updates a position """
+        editFriend(input: FriendInput): Friend
         """ Adds or updates a position """
         addPosition(input: PositionInput): Boolean
 
         """Find nearby Friends"""
         findNearbyFriends(input: nearbyFriendInput): [Friend]
+
+       """Delete a friend"""
+       deleteFriend(input: Email): Boolean
        
     }
 `;

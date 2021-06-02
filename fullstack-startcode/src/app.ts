@@ -62,11 +62,30 @@ app.use('/graphql', graphqlHTTP({
   graphiql: true,
 }));
 
+//Endpoint til find-friends native appen
+import PositionFacade from './facades/positionFacade';
+let facade: PositionFacade;
+
+app.post("/friends", async (req, res) => {
+  if (!facade) {
+    const db = req.app.get("db")
+    facade = new PositionFacade(db)
+  }
+  const { email, password, longitude, latitude, distance } = req.body;
+  const friends = await facade.findNearbyFriends(email, password, longitude, latitude, distance)
+  const friendsToReturn = friends.map((f: any) => {
+    return { email: f.email, name: f.name, longitude: f.location.coordinates[0], latitude: f.location.coordinates[1] }
+  })
+  res.json(friendsToReturn)
+})
+
 //Grants access to static files
 app.use(express.static(path.join(process.cwd(), "public")))
 
 /*Friend part of API*/
 app.use("/api/friends", friendsRoutes)
+
+
 
 //Simple GET endpoint
 app.get("/demo", (req, res) => {

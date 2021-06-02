@@ -11,7 +11,7 @@ return new Promise((resolve, rejects) => {
     });
 })
 }
-/*
+
 const promises = [
     cryptoPromise(48),
     cryptoPromise(40),
@@ -28,7 +28,7 @@ const sixRandoms =  Promise.all(promises).then(results => {
     return myObject;
 })
 //sixRandoms.then(obj => {console.log(obj)})
-*/
+
 
 const sixRandoms = async (array) => {
     const myObject = {

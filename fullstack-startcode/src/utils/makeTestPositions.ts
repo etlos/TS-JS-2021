@@ -15,7 +15,7 @@ async function makeTestPositions() {
 
   await friendsCollection.deleteMany({});
 
-  const f1 = { firstName: "Peter", lastName: "Pan", email: "pp@b.dk", password: hashedPW, role: "user" }
+  const f1 = { firstName: "Peter", lastName: "Pan", email: "pp@b.dk", chpassword: hashedPW, role: "user" }
   const f2 = { firstName: "Donald", lastName: "Duck", email: "dd@b.dk", password: hashedPW, role: "user" }
   const f3 = { firstName: "Peter", lastName: "Admin", email: "peter@admin.dk", password: hashedPW, role: "admin" }
 
